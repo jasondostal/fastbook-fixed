@@ -32,11 +32,14 @@ Then open `01_intro.ipynb` and go. Work top-to-bottom, running each cell.
 
 ## Companion reading
 
-**[`PRIMER_algorithms_and_deep_learning_math.md`](PRIMER_algorithms_and_deep_learning_math.md)** — a plain-English primer on
-algorithms (divide & conquer, greedy, dynamic programming, network flow, P-vs-NP) and the math behind deep learning
-(linear algebra, gradients, gradient descent, loss/activation functions, backprop). Written to pair with a
-[CS577-style algorithms course](https://pages.cs.wisc.edu/~shuchi/courses/577-F14/) and this deep-learning course —
-every concept explained by analogy first, formula second. No prior math love required.
+**[`PRIMER_algorithms_and_deep_learning_math.md`](PRIMER_algorithms_and_deep_learning_math.md)** — a plain-English primer
+spanning three courses at once: **algorithms** ([CS577](https://pages.cs.wisc.edu/~shuchi/courses/577-F14/): divide &
+conquer, greedy, dynamic programming, network flow, P-vs-NP), **classical AI & machine learning**
+([CS540](https://pages.cs.wisc.edu/~gkotse/cs540s26/index.html): search/A\*, minimax, regression, kNN, naive Bayes,
+decision trees, k-means, NLP, reinforcement learning), and the **math behind deep learning** (this course: linear algebra,
+gradients, gradient descent, loss/activation functions, backprop, CNNs). Every concept explained by analogy first,
+formula second, with a linked table of contents, per-part further-reading pointers, a curated resource list, and a
+section mapping each topic back to all three courses. No prior math love required.
 
 ## Attribution & license
 
