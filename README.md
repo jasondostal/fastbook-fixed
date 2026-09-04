@@ -16,12 +16,16 @@ Every chapter marked ✅ was **executed top to bottom** in the environment below
 either produced output or failed *on purpose* (see [Intentional errors](#intentional-errors)).
 Nothing is marked verified because it looked fine.
 
+**All 20 chapters run.** 27 fixes were needed to get there — the earlier pass of this repo
+claimed ch01–07 were verified when four of them still failed, including ch01 hard-crashing
+the kernel 69 minutes in. That claim is now backed by actual runs.
+
 Verified on: **fastai 2.8.8 · torch 2.14.0 · pandas 3.0.5 · Python 3.12 · macOS 26.4 ·
 Apple M5 Pro (MPS)**, on 2026-09-04.
 
 | Chapter | Status | Runtime | Notes |
 |---|---|---|---|
-| 01_intro | 🔧 re-verifying | 159.7 min | Metal LSTM crash fixed; ran clean bar the upload widget, now also fixed |
+| 01_intro | ✅ verified | 163.8 min | Metal LSTM crash fixed (CPU text cell); upload widget degrades gracefully |
 | 02_production | ✅ verified | 0.8 min | `learn.export()` was broken; upload widget now degrades gracefully |
 | 03_ethics | ✅ verified | 0.1 min | prose + a couple of cells |
 | 04_mnist_basics | ✅ verified | 0.2 min | needed the Graphviz **system** binary |
