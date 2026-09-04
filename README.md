@@ -22,7 +22,7 @@ Apple M5 Pro (MPS)**, on 2026-09-04.
 | Chapter | Status | Runtime | Notes |
 |---|---|---|---|
 | 01_intro | 🔧 fixed, run pending | — | Metal LSTM crash fixed; full run is multi-hour (CPU text cell) |
-| 02_production | 🔧 fixed, run pending | — | Has interactive upload widgets — needs a human, can't verify headlessly |
+| 02_production | ✅ verified | 0.8 min | `learn.export()` was broken; upload widget now degrades gracefully |
 | 03_ethics | ✅ verified | 0.1 min | prose + a couple of cells |
 | 04_mnist_basics | ✅ verified | 0.2 min | needed the Graphviz **system** binary |
 | 05_pet_breeds | ✅ verified | 37.6 min | MPS presizing crash fixed; 1 intentional error |
@@ -58,6 +58,15 @@ routinely violate it ([pytorch#96056](https://github.com/pytorch/pytorch/issues/
 fails **mid-epoch**, several batches in, so it reads like a random flake. Affects **ch05** and
 **ch07**. Fixed by running that single op on CPU — everything else stays on the GPU, so
 ch05 still trains at ~41 s/epoch.
+
+**`learn.export()` is broken in fastai 2.8.8.** Transforms dispatch through
+[plum](https://github.com/beartype/plum), whose `Function` object holds a threading `RLock`.
+That makes the entire `Learner` unpicklable, so `export()` dies with
+`cannot pickle '_thread.RLock' object` — taking the whole *deploy your model* lesson in ch02
+with it. Fixed by teaching plum's `Function` to drop the lock when pickling and rebuild it on
+load; `export()` → `load_learner()` → `predict()` then round-trips cleanly. (Note that
+`export()` defaults to `cloudpickle` while `load_learner` defaults to stdlib `pickle`, so load
+with the default — cloudpickle has no `Unpickler`.)
 
 **GroupLens' TLS certificate expired on 2026-08-28**, which breaks
 `untar_data(URLs.ML_100k)` for everyone, not just this repo. ch08 now tries the official
