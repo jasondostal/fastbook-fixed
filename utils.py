@@ -25,19 +25,20 @@ def get_image_files_sorted(path, recurse=True, folders=None): return get_image_f
 
 
 # +
-# pip install azure-cognitiveservices-search-imagesearch
+# Microsoft retired the Bing Image Search API, and the old
+# azure-cognitiveservices-search-imagesearch import failed at module load. Use
+# DuckDuckGo instead (pip install ddgs), matching what chapter 2 does.
 
-from azure.cognitiveservices.search.imagesearch import ImageSearchClient as api
-from msrest.authentication import CognitiveServicesCredentials as auth
-
-def search_images_bing(key, term, min_sz=128, max_images=150):    
-     params = {'q':term, 'count':max_images, 'minHeight':min_sz, 'minWidth':min_sz, 'imageType':'photo'}
-     headers = {"Ocp-Apim-Subscription-Key":key}
-     search_url = "https://api.bing.microsoft.com/v7.0/images/search"
-     response = requests.get(search_url, headers=headers, params=params)
-     response.raise_for_status()
-     search_results = response.json()
-     return L(search_results['value'])
+def search_images(term, max_images=150):
+    "Search for images by `term`; returns an L of image URLs."
+    from ddgs import DDGS
+    import time
+    try:
+        results = list(DDGS().images(term, max_results=max_images))
+    except Exception:
+        time.sleep(10)
+        results = list(DDGS().images(term, max_results=max_images))
+    return L(r['image'] for r in results)
 
 
 # -
@@ -88,10 +89,11 @@ def draw_tree(t, df, size=10, ratio=0.6, precision=0, **kwargs):
 
 # +
 from scipy.cluster import hierarchy as hc
+from scipy.spatial.distance import squareform
 
 def cluster_columns(df, figsize=(10,6), font_size=12):
     corr = np.round(scipy.stats.spearmanr(df).correlation, 4)
-    corr_condensed = hc.distance.squareform(1-corr)
+    corr_condensed = squareform(1-corr)   # SciPy removed hc.distance
     z = hc.linkage(corr_condensed, method='average')
     fig = plt.figure(figsize=figsize)
     hc.dendrogram(z, labels=df.columns, orientation='left', leaf_font_size=font_size)

@@ -21,7 +21,7 @@ Apple M5 Pro (MPS)**, on 2026-09-04.
 
 | Chapter | Status | Runtime | Notes |
 |---|---|---|---|
-| 01_intro | 🔧 fixed, run pending | — | Metal LSTM crash fixed; full run is multi-hour (CPU text cell) |
+| 01_intro | 🔧 re-verifying | 159.7 min | Metal LSTM crash fixed; ran clean bar the upload widget, now also fixed |
 | 02_production | ✅ verified | 0.8 min | `learn.export()` was broken; upload widget now degrades gracefully |
 | 03_ethics | ✅ verified | 0.1 min | prose + a couple of cells |
 | 04_mnist_basics | ✅ verified | 0.2 min | needed the Graphviz **system** binary |
@@ -29,7 +29,7 @@ Apple M5 Pro (MPS)**, on 2026-09-04.
 | 06_multicat | ✅ verified | 7.6 min | `BCEWithLogitsLoss` subclass dispatch fixed |
 | 07_sizing_and_tta | ✅ verified | 41.4 min | MPS presizing crash fixed |
 | 08_collab | ✅ verified | 2.0 min | GroupLens TLS cert expired — mirror fallback added |
-| 09_tabular | ⛔ blocked | — | needs Kaggle competition rules accepted (see below) |
+| 09_tabular | ✅ verified | 1.2 min | mirror data + 7 library-drift fixes (dtreeviz, sklearn, scipy, pandas) |
 | 10_nlp | ⚠️ reduced-scale | 5.7 min | code path verified on a subsampled corpus; see below |
 | 11_midlevel_data | ✅ verified | 0.4 min | no changes needed |
 | 12_nlp_dive | ✅ verified | 0.3 min | no changes needed |
@@ -73,6 +73,21 @@ with the default — cloudpickle has no `Unpickler`.)
 source first and falls back to a Kaggle mirror of the same archive, so it self-heals once
 GroupLens renews.
 
+**Unmaintained packages vs. modern scikit-learn/pandas (ch09).** `dtreeviz` 2.x replaced the
+top-level `dtreeviz(...)` call with `model(...).view(...)`; sklearn dropped
+`plot_partial_dependence` for `PartialDependenceDisplay` *and* now refuses integer columns;
+SciPy removed `hc.distance`, which fastbook's own `cluster_columns()` calls;
+`treeinterpreter` (unmaintained since 2019) squeezes only `axis=1` of `tree_.value` and so
+chokes on modern sklearn's `(n, 1, 1)` regressor shape; and `waterfallcharts` indexes a
+Series positionally, which pandas 3 no longer allows. The last two are fixed by re-`exec`ing
+each library's own function with a single corrected line, rather than vendoring their
+internals — verified that `prediction == bias + contributions.sum()` still holds.
+
+**`utils.py` was broken at import.** It did a module-level
+`from azure.cognitiveservices.search.imagesearch import ...` for the retired Bing API, so
+`import utils` failed outright. Replaced with a DuckDuckGo `search_images()`, plus the same
+`squareform` fix.
+
 **Library drift.** `create_body()` now needs an instantiated model; fastcore's
 `Self.parent.name()` broke because `.name` is a plain `str`; pandas 3 removed `inplace=` from
 `set_categories`; `nn.BCEWithLogitsLoss` has no `__torch_function__` implementation for
@@ -105,10 +120,14 @@ ch04 and ch09 fail with `ExecutableNotFound: failed to execute Path('dot')`.
 
 ## Known limits
 
-- **ch09 needs you to accept the Kaggle competition rules** for
-  [Bluebook for Bulldozers](https://www.kaggle.com/c/bluebook-for-bulldozers/rules).
-  Until you do, the download returns HTTP 403. The code fixes are applied, but it has not
-  been run here.
+- **ch09 uses a mirror of the competition data.** Bluebook for Bulldozers is a *Featured*
+  competition that closed in April 2013 and no longer accepts new entrants, so
+  `competition_download_cli()` returns HTTP 403 — there is no rules button left to click.
+  The notebook now falls back to a Kaggle *dataset* mirror. One caveat worth knowing: the
+  mirrors' `Valid.csv` has no `SalePrice` column (it was the competition's held-out answer
+  set), so the labelled `Train.csv` stands in for `TrainAndValid.csv`. It spans 1989-01 to
+  2011-12, so the book's `saledate < '2011-11'` split works exactly as written — you just
+  get 5,754 validation rows instead of ~7,988.
 - **ch10 is verified on a reduced corpus.** Because the Metal bug forces CPU, a full IMDB
   language-model fine-tune is roughly a 60-hour job on this machine. The whole notebook
   completes cleanly on a subsampled corpus, so the *code* is verified; the published accuracy
