@@ -1,9 +1,21 @@
-fastai>=2.0.0
-graphviz
-ipywidgets
+fastai>=2.8
+torch>=2.0
+torchvision
+ipywidgets>=8
 matplotlib
-nbdev>=0.2.12
 pandas
 scikit_learn
-azure-cognitiveservices-search-imagesearch
 sentencepiece
+graphviz
+ddgs
+kaggle
+nbdev>=0.2.12
+
+# NOTE: the `graphviz` line above is only the Python binding. The notebooks that
+# draw diagrams (ch04, ch09) also need the Graphviz *system* binary on PATH, or
+# they fail with: ExecutableNotFound: failed to execute Path('dot').
+#   macOS:  brew install graphviz
+#   Ubuntu: sudo apt install graphviz
+#
+# Bing Image Search (azure-cognitiveservices-search-imagesearch) was retired by
+# Microsoft; ch02 now uses DuckDuckGo (`ddgs`) and Kaggle instead.
